@@ -1,16 +1,16 @@
 = rserve-simpler
 
-rserve-client is a fantastic gem that lets a user communicate with R in a
-straighforward, efficient way.  rserve-simpler provides some simple additions
-to make some things even easier.
+rserve-simpler is a simple interface on top of
+{rserve-client}[https://github.com/clbustos/Rserve-Ruby-client], a fantastic
+gem that lets a user communicate with R in a straighforward, efficient way.
 
-rserve-simpler is layered on top of the well-written rserve-client.  See
-{rserve-client}[https://github.com/clbustos/Rserve-Ruby-client] for more
-background and for doing anything fancy.
+{rserve-client}[https://github.com/clbustos/Rserve-Ruby-client] is doing all
+the heavy lifting and should be consulted for background.
 
 == Synposis
 
-Using Ruby 1.9 hash syntax, but this should work on 1.8 if keyed old-school.
+These examples use Ruby 1.9 hash syntax, but this should work on 1.8 if the
+hashes are keyed old-style ( => ).
 
     require 'rserve/simpler'
     r = Rserve::Simpler.new
@@ -38,8 +38,19 @@ Using Ruby 1.9 hash syntax, but this should work on 1.8 if keyed old-school.
     r.converse "z"  # -> 1.0
 
 === simple DataFrame
+
+==== with a hash
+
+Column names are derived from hash keys (#keys).  Ruby 1.9 hashes keep track
+of insertion order.  Use an OrderedHash (gem install orderedhash) for ruby
+1.8, or set colnames.
      
-    hash = {var1: [1,2,3,4], fac2: [3,4,5,6], res1: [4,5,6,7] }
+    hash = {
+      var1: [1,2,3,4], 
+      fac2: [3,4,5,6], 
+      res1: [4,5,6,7]
+    }
+    # convert with hash.to_dataframe or Rserve::DataFrame.new(hash)
     r.command( df: hash.to_dataframe ) do 
       %Q{ 
         pdf("out.pdf")
@@ -48,9 +59,17 @@ Using Ruby 1.9 hash syntax, but this should work on 1.8 if keyed old-school.
       }
     end
 
-    # STructs too
+==== with an array of Structs
 
-    ........ fill in 
+    DataRow = Struct.new(:var1, :fac1, :res1)
+    structs = [
+      DataRow.new(1,3,4),
+      DataRow.new(2,4,5),
+      DataRow.new(3,5,6),
+      DataRow.new(4,6,7)
+    ]
+    dataframe = Rserve::DataFrame.from_structs(structs)
+    reply = r.converse("summary(df)", df: dataframe)
 
 == Copyright
 
