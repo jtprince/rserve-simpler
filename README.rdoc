@@ -1,19 +1,58 @@
 = rserve-simpler
 
-Description goes here.
+rserve-client is a fantastic gem that lets a user communicate with R in a
+straighforward, efficient way.  rserve-simpler provides some simple additions
+to make some things even easier.
 
-== Contributing to rserve-simpler
- 
-* Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
-* Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
-* Fork the project
-* Start a feature/bugfix branch
-* Commit and push until you are happy with your contribution
-* Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
-* Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+rserve-simpler is layered on top of the well-written rserve-client.  See
+{rserve-client}[https://github.com/clbustos/Rserve-Ruby-client] for more
+background and for doing anything fancy.
+
+== Synposis
+
+Using Ruby 1.9 hash syntax, but this should work on 1.8 if keyed old-school.
+
+    require 'rserve/simpler'
+    r = Rserve::Simpler.new
+
+=== #converse
+
+    # converse with R (like eval but applies .to_ruby to result)
+    r.converse "mean(c(1,2,3))"  # -> 2.0
+
+    # converse lets you name variables in a hash (1.9 hash syntax)
+    r.converse(a: [1,2,3], b: [4,5,6]) { "cor(a,b)" } # -> 1.0
+    # another form doing the same thing
+    r.converse("cor(a,b)", a: [1,2,3], b: [4,5,6])
+
+==== prompt-like syntax >>
+
+    r >> "mean(c(1,2,3))"  # -> 2.0
+    # note: use '.' to get proper behavior with multiple args or blocks
+    r.>> "cor(a,b)", a: [1,2,3], b: [1,2,3]
+
+=== #command
+
+    # use the same syntax but without caring about the reply
+    r.command(a: [1,2,3], b: [4,5,6]) { "z <- cor(a,b)" }  # -> true
+    r.converse "z"  # -> 1.0
+
+=== simple DataFrame
+     
+    hash = {var1: [1,2,3,4], fac2: [3,4,5,6], res1: [4,5,6,7] }
+    r.command( df: hash.to_dataframe ) do 
+      %Q{ 
+        pdf("out.pdf")
+        plot(df)
+        dev.off()
+      }
+    end
+
+    # STructs too
+
+    ........ fill in 
 
 == Copyright
 
-Copyright (c) 2011 John Prince. See LICENSE.txt for
-further details.
+see LICENSE.txt
 
