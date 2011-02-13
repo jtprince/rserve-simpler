@@ -15,7 +15,7 @@ hashes are keyed old-style ( => ).
     require 'rserve/simpler'
     r = Rserve::Simpler.new
 
-=== #converse
+=== converse
 
     # converse with R (like eval but applies .to_ruby to result)
     r.converse "mean(c(1,2,3))"  # -> 2.0
@@ -25,13 +25,13 @@ hashes are keyed old-style ( => ).
     # another form doing the same thing
     r.converse("cor(a,b)", a: [1,2,3], b: [4,5,6])
 
-==== prompt-like syntax >>
+==== prompt-like syntax '>>'
 
     r >> "mean(c(1,2,3))"  # -> 2.0
     # note: use '.' to get proper behavior with multiple args or blocks
     r.>> "cor(a,b)", a: [1,2,3], b: [1,2,3]
 
-=== #command
+=== command
 
     # use the same syntax but without caring about the reply
     r.command(a: [1,2,3], b: [4,5,6]) { "z <- cor(a,b)" }  # -> true
@@ -47,7 +47,7 @@ of insertion order.  Use an OrderedHash (gem install orderedhash) for ruby
      
     hash = {
       var1: [1,2,3,4], 
-      fac2: [3,4,5,6], 
+      fac1: [3,4,5,6], 
       res1: [4,5,6,7]
     }
     # convert with hash.to_dataframe or Rserve::DataFrame.new(hash)
@@ -68,8 +68,26 @@ of insertion order.  Use an OrderedHash (gem install orderedhash) for ruby
       DataRow.new(3,5,6),
       DataRow.new(4,6,7)
     ]
-    dataframe = Rserve::DataFrame.from_structs(structs)
-    reply = r.converse("summary(df)", df: dataframe)
+    datafr = Rserve::DataFrame.from_structs(structs)
+    reply = r.converse("summary(df)", df: datafr).each_cons(6).to_a
+    datafr.colnames.zip(reply) {|name,data| puts [name].+(data).join("\n ") }
+
+    ## outputs -> :
+    var1
+     Min.   :1.00  
+     1st Qu.:1.75  
+     Median :2.50  
+     Mean   :2.50  
+     3rd Qu.:3.25  
+     Max.   :4.00  
+    fac1
+     Min.   :3.00  
+     1st Qu.:3.75  
+     ...
+
+=== Notes on plotting
+
+    ...
 
 == Copyright
 
