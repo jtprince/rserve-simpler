@@ -20,5 +20,5 @@ DEPENDENCIES
   bundler (~> 1.0.0)
   jeweler (~> 1.5.2)
   rcov
-  rserve-client (= 0.2.5)
+  rserve-client (~> 0.2.5)
   spec-more
