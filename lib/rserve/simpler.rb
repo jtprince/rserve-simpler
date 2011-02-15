@@ -2,6 +2,11 @@
 require 'rserve'
 require 'rserve/rexp'
 require 'rserve/data_frame'
+begin
+  require 'narray'
+rescue LoadError
+  class NArray ; end
+end
 
 class Rserve::Simpler < Rserve::Connection
 
@@ -16,6 +21,8 @@ class Rserve::Simpler < Rserve::Connection
             wrapped_lists = obj.data.values.map {|v| Rserve::REXP::Wrapper.wrap(v) }
             z = Rserve::Rlist.new(wrapped_lists, obj.colnames.map(&:to_s))
             Rserve::REXP.create_data_frame(z)
+          when NArray
+            obj.to_a
           else
             obj
           end
