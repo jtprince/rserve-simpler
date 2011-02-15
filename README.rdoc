@@ -9,33 +9,48 @@ the heavy lifting and should be consulted for background.
 
 == Synposis
 
-These examples use Ruby 1.9 hash syntax, but this should work on 1.8 if the
-hashes are keyed old-style ( => ).
 
     require 'rserve/simpler'
     r = Rserve::Simpler.new
 
-=== converse
+    # or can initialize a connection held in the 'R' constant:
+    require 'rserve/simpler/R'
+    R.do_something_fantastic ...  # ** not a real method
 
-    # converse with R (like eval but applies .to_ruby to result)
+=== converse, convert, command
+
+These commands specify ways of talking to your Rserve connection.  All three
+allow passing names through to R in a hash.  They differ chiefly in the type
+of output you'll receive back from R.  
+
+    # converse: to_ruby the result
     r.converse "mean(c(1,2,3))"  # -> 2.0
 
-    # converse lets you name variables in a hash (1.9 hash syntax)
+    # convert: Rserve::REXP result
+    rexp = r.convert "mean(c(1,2,3))"  # -> #<Rserve::REXP::Double:0x00000002296498 @payload=[2.0], @attr=nil>
+    rexp.as_doubles   # -> [2.0]
+    rexp.to_ruby      # -> 2.0
+
+    # command: boolean reply if things went well
+    r.command "z <- mean(c(1,2,3))"  # -> true
+    # can retrieve variables with converse
+    r.converse "z"  # -> 2.0
+
+converse/convert/command let you name variables in a hash as a shortcut to
+'assign'.  [These examples use Ruby 1.9 hash syntax, but they should work on
+1.8 if the hashes are keyed old-style {:key => val}]
+    
     r.converse(a: [1,2,3], b: [4,5,6]) { "cor(a,b)" } # -> 1.0
     # another form doing the same thing
     r.converse("cor(a,b)", a: [1,2,3], b: [4,5,6])
 
 ==== prompt-like syntax '>>'
 
+'>>' is an alias for converse, so you can write code like this:
+
     r >> "mean(c(1,2,3))"  # -> 2.0
     # note: use '.' to get proper behavior with multiple args or blocks
     r.>> "cor(a,b)", a: [1,2,3], b: [1,2,3]
-
-=== command
-
-    # use the same syntax but without caring about the reply
-    r.command(a: [1,2,3], b: [4,5,6]) { "z <- cor(a,b)" }  # -> true
-    r.converse "z"  # -> 1.0
 
 === simple DataFrame
 
@@ -87,7 +102,36 @@ of insertion order.  Use an OrderedHash (gem install orderedhash) for ruby
 
 === Notes on plotting
 
-    ...
+Rserve is great for graphical output.  Here are some pointers when getting started with plotting:
+
+==== plot to screen
+
+    r.command "plot(c(1,2,3), c(3,4,5))"
+    # if you resize a window (at least on Ubuntu) you may need to re-issue the call
+    r.command "plot(c(1,2,3), c(3,4,5))"
+    # return a list of currently used devices (device 2 is the only one being used)
+    # to_ruby returns an array of 1 value as a number
+    r.converse "dev.list()" # -> 2
+    # shut off graphics device 2
+    r.command "dev.off(2)"
+    r.command "graphics.off()"  # shut off all graphics
+
+==== plot to file
+
+Files are written below the workdir specified when the Rserve connection was
+made (see {Rserve configuration}[http://www.rforge.net/Rserve/doc.html#conf]
+for background) and this is "/tmp/Rserve" on my system.
+
+    r.>> "pdf('output.pdf')", "plot(c(1,2,3),c(4,5,6))", "dev.off()"
+    # outputs file /tmp/Rserv/conn156/output.pdf
+    # note the connection number dir!
+    # (I haven't figured out how to predict this number)
+
+== TODO
+
+* simple option to use pwd as default directory
+* quiet the startup of Rserve by default
+* wrap graphic output commands
 
 == Copyright
 

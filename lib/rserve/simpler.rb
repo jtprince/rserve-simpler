@@ -36,11 +36,18 @@ class Rserve::Simpler < Rserve::Connection
     end
     to_eval = args
     unless block.nil?
-      to_eval << block.call
+      to_eval.push(*block.call)
     end
     to_eval
   end
 
+  # eval and cast reply .to_ruby
+  #
+  # typically, a single string is passed in either as the first argument or
+  # with the block.  The results of .to_ruby are passed back to the caller.
+  # However, if multiple strings are passed in (either as multiple string
+  # arguments or as multiple strings in the block, or one of each, etc.) the
+  # reply will be given as an array, one reply for each string.
   def converse(*args, &block)
     reply = with(*args, &block).map do |str|
       response = self.eval(str)
@@ -55,8 +62,16 @@ class Rserve::Simpler < Rserve::Connection
 
   alias_method '>>'.to_sym, :converse
 
+  # void_eval
   def command(*args, &block)
     self.void_eval with(*args, &block).join("\n")
+  end
+
+  def convert(*args, &block)
+    reply = with(*args, &block).map do |str|
+      self.eval(str)
+    end
+    (reply.size == 1) ?  reply.first : reply
   end
 
 end

@@ -2,6 +2,13 @@ require 'spec_helper'
 
 require 'rserve/simpler'
 
+describe "initializing a connection held in 'R'" do
+  it 'require "rserve/simpler/R" # loads a connection into R' do
+    require 'rserve/simpler/R'
+    R.converse("mean(c(1,2,3))").is 2.0
+    R.close
+  end
+end
 
 describe 'rserve connection with simpler' do
   xit 'is quiet on startup' do
@@ -36,6 +43,10 @@ describe 'rserve connection with simpler additions' do
     (mean, cor) = @r.converse("mean(a)", "cor(a,b)", :a => [1,2,3], :b => [4,5,6])
     mean.is 2.0
     cor.is 1.0
+    # not sure why you'd want to do this, but this is okay
+    (mean, cor) = @r.converse("mean(a)") { "cor(a,b)" } 
+    # also okay
+    (mean, cor) = @r.converse "mean(a)", "cor(a,b)"
   end
 
   it 'has a prompt-like syntax' do
@@ -50,7 +61,15 @@ describe 'rserve connection with simpler additions' do
     @r.converse("z").is 1.0
   end
 
+  it "convert to REXP" do
+    reply =  @r.convert(:a => [1,2,3], :b => [4,5,6]) { "cor(a,b)" }
+    ok reply.is_a?(Rserve::REXP::Double)
+    reply.as_doubles.is [1.0]
+    reply.to_ruby .is 1.0
+  end
+
   xit "returns the REXP if to_ruby raises an error" do
+    # still need to test this
     flunk
   end
 
