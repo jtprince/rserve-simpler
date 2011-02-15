@@ -16,7 +16,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/jtprince/rserve-simpler"
   gem.license = "MIT"
   gem.summary = %Q{simple interface for interacting with R through Rserve}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.description = %Q{interface layered on top of rserve-client gem for interacting with R}
   gem.email = "jtprince@gmail.com"
   gem.authors = ["John Prince"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
