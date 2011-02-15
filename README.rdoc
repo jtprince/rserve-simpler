@@ -18,21 +18,20 @@ the heavy lifting and should be consulted for background.
 
 === converse, convert, command
 
-These commands specify ways of talking to your Rserve connection.  All three
-allow passing names through to R in a hash.  They differ chiefly in the type
-of output you'll receive back from R.  
+These commands specify ways of talking to your Rserve connection.  They differ
+chiefly in the type of output you'll receive back from R.  
 
-    # converse: to_ruby the result
+    # converse: casts the result with 'to_ruby'
     r.converse "mean(c(1,2,3))"  # -> 2.0
 
-    # convert: Rserve::REXP result
+    # convert: returns the raw Rserve::REXP result (like eval)
     rexp = r.convert "mean(c(1,2,3))"  # -> #<Rserve::REXP::Double:0x00000002296498 @payload=[2.0], @attr=nil>
     rexp.as_doubles   # -> [2.0]
     rexp.to_ruby      # -> 2.0
 
-    # command: boolean reply if things went well
+    # command: tell R what to do and only expect boolean reply
     r.command "z <- mean(c(1,2,3))"  # -> true
-    # can retrieve variables with converse
+    # all variables are persistent in the session and can be retrieved later
     r.converse "z"  # -> 2.0
 
 converse/convert/command let you name variables in a hash as a shortcut to
@@ -48,14 +47,16 @@ converse/convert/command let you name variables in a hash as a shortcut to
 '>>' is an alias for converse, so you can write code like this:
 
     r >> "mean(c(1,2,3))"  # -> 2.0
-    # note: use '.' to get proper behavior with multiple args or blocks
+    # note: use '.>>' (and parentheses at times) to get proper behavior with multiple args or blocks
     r.>> "cor(a,b)", a: [1,2,3], b: [1,2,3]
 
 === simple DataFrame
 
-==== with a hash
+Data frames are a prominent object in R.  Simpler provides a simple ruby DataFrame object.
 
-Column names are derived from hash keys (#keys).  Ruby 1.9 hashes keep track
+==== Hash based
+
+Column names are derived from the data hash's keys.  Ruby 1.9 hashes keep track
 of insertion order.  Use an OrderedHash (gem install orderedhash) for ruby
 1.8, or set colnames.
      
@@ -74,6 +75,8 @@ of insertion order.  Use an OrderedHash (gem install orderedhash) for ruby
     end
 
 ==== with an array of Structs
+
+The equivalent data frame as above can be generated with an array of Struct objects.
 
     DataRow = Struct.new(:var1, :fac1, :res1)
     structs = [
@@ -105,15 +108,35 @@ Rserve is great for graphical output.  Here are some pointers when getting start
 
 ==== plot to screen
 
-    r.command "plot(c(1,2,3), c(3,4,5))"
+Plots to x11() are persistent until the script or session ends.
+
+Inside an irb session:
+
+    irb>>  r >> "plot(c(1,2,3), c(3,4,5))"
     # if you resize a window (at least on Ubuntu) you may need to re-issue the call
-    r.command "plot(c(1,2,3), c(3,4,5))"
+    irb>>  r >> "plot(c(1,2,3), c(3,4,5))"
     # return a list of currently used devices (device 2 is the only one being used)
     # to_ruby returns an array of 1 value as a number
-    r.converse "dev.list()" # -> 2
+    irb>>  r >> "dev.list()"
+    => 2
     # shut off graphics device 2
-    r.command "dev.off(2)"
-    r.command "graphics.off()"  # shut off all graphics
+    # [??] sometimes this generates windows 3 & 4, not sure what is happening
+    irb>> r >> "dev.off(2)"
+    # shut off all graphics
+    irb>> r >> "graphics.off()"  
+
+In a script, your plot will appear until the script exits.  This usually means
+you'll miss the display of your plot.  Two ways to deal with this:
+
+===== sleep
+
+    r >> "plot(c(1,2,3), c(4,5,6))"
+    sleep(7)  # pause for 7 seconds
+
+===== r.pause
+
+    r >> "plot(c(1,2,3), c(4,5,6))"
+    r.pause  # pauses things until a key is pressed in terminal
 
 ==== plot to file
 

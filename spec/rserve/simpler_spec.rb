@@ -106,6 +106,14 @@ if RUBY_VERSION > '1.9'
       df2.rownames.is [1,2,3,4]
     end
 
+    it 'allows colnames to be set if necessary' do
+      df1 = Rserve::DataFrame.new(@hash) 
+      df1.colnames.enums [:fac1, :var1, :res1]
+      df1.colnames = %w(word to yo)
+      df1.colnames.enums %w(word to yo)
+      @r.converse(df: df1) { "names(df)" }.enums %w(word to yo)
+    end
+
     it 'converts an array of parallel structs into a dataframe' do
       df = Rserve::DataFrame.from_structs( @ar_of_structs )
       df.is @hash.to_dataframe

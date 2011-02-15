@@ -13,8 +13,8 @@ class Rserve::Simpler < Rserve::Connection
         rserve_compat_obj = 
           case obj
           when Rserve::DataFrame
-            wrapped_lists = obj.hash.values.map {|v| Rserve::REXP::Wrapper.wrap(v) }
-            z = Rserve::Rlist.new(wrapped_lists, obj.hash.keys.map(&:to_s))
+            wrapped_lists = obj.data.values.map {|v| Rserve::REXP::Wrapper.wrap(v) }
+            z = Rserve::Rlist.new(wrapped_lists, obj.colnames.map(&:to_s))
             Rserve::REXP.create_data_frame(z)
           else
             obj
@@ -72,6 +72,13 @@ class Rserve::Simpler < Rserve::Connection
       self.eval(str)
     end
     (reply.size == 1) ?  reply.first : reply
+  end
+
+  def pause
+    require 'curses'
+    Curses.clear
+    Curses.addstr("<< press any key when done >>")
+    Curses.getch
   end
 
 end
