@@ -9,7 +9,6 @@ the heavy lifting and should be consulted for background.
 
 == Synposis
 
-
     require 'rserve/simpler'
     r = Rserve::Simpler.new
 
