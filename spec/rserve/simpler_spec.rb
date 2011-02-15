@@ -75,6 +75,21 @@ describe 'rserve connection with simpler additions' do
 
 end
 
+begin
+  require 'narray'
+  describe 'compatible with NArray' do
+    before do
+      @r = Rserve::Simpler.new
+    end
+    it 'takes NArray vectors as input' do
+      @r.converse(x: NArray[1,2,3], y: NArray[4,5,6]) { "cor(x,y)" }.is 1.0
+    end
+  end
+rescue LoadError
+  xdescribe "compatible with NArray [narray not installed!]"
+end
+
+
 if RUBY_VERSION > '1.9'
 
   # TODO: write these compatible for 1.8

@@ -126,6 +126,10 @@ for background) and this is "/tmp/Rserve" on my system.
     # note the connection number dir!
     # (I haven't figured out how to predict this number)
 
+=== support for NArray
+
+NArray vectors work as input to converse, convert, and command.
+
 == TODO
 
 * simple option to use pwd as default directory
