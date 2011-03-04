@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'rserve/simpler'
 
 describe "initializing a connection held in 'R'" do
-  xit 'require "rserve/simpler/R" # loads a connection into R' do
+  it 'require "rserve/simpler/R" # loads a connection into R' do
     require 'rserve/simpler/R'
     R.converse("mean(c(1,2,3))").is 2.0
     R.close
@@ -26,20 +26,20 @@ describe 'rserve connection with simpler additions' do
     @r.close
   end
 
-  xit 'converses with R using strings' do
+  it 'converses with R using strings' do
   # both sides speak native
     ok @r.connected?
     reply = @r.converse "mean(c(1,2,3))"
     @r.converse("mean(c(1,2,3))").is 2.0
   end
 
-  xit 'converses with R using arrays and numbers' do
+  it 'converses with R using arrays and numbers' do
     @r.converse("cor(a,b)", :a => [1,2,3], :b => [4,5,6]).is 1.0
     @r.converse(:a => [1,2,3], :b => [4,5,6]) { "cor(a,b)" }.is 1.0
     @r.converse(:a => 3) { "mean(a)" }.is 3.0
   end
 
-  xit 'can converse in sentences' do
+  it 'can converse in sentences' do
     (mean, cor) = @r.converse("mean(a)", "cor(a,b)", :a => [1,2,3], :b => [4,5,6])
     mean.is 2.0
     cor.is 1.0
@@ -49,7 +49,7 @@ describe 'rserve connection with simpler additions' do
     (mean, cor) = @r.converse "mean(a)", "cor(a,b)"
   end
 
-  xit 'has a prompt-like syntax' do
+  it 'has a prompt-like syntax' do
     reply = @r >> "mean(c(1,2,3))"
     reply.is 2.0
     reply = @r.>> "cor(a,b)", a: [1,2,3], b: [1,2,3]
@@ -81,7 +81,7 @@ begin
     before do
       @r = Rserve::Simpler.new
     end
-    xit 'takes NArray vectors as input' do
+    it 'takes NArray vectors as input' do
       @r.converse(x: NArray[1,2,3], y: NArray[4,5,6]) { "cor(x,y)" }.is 1.0
     end
   end
@@ -112,7 +112,7 @@ if RUBY_VERSION > '1.9'
       @r.close
     end
 
-    xit 'gives hashes a .to_dataframe method' do
+    it 'gives hashes a .to_dataframe method' do
       # only need to set the colnames with Ruby 1.8 (unless using OrderedHash)
       df1 = Rserve::DataFrame.new(@hash) 
       df2 = @hash.to_dataframe
@@ -124,7 +124,7 @@ if RUBY_VERSION > '1.9'
       df2.rownames.is [1,2,3,4]
     end
 
-    xit 'allows colnames to be set if necessary' do
+    it 'allows colnames to be set if necessary' do
       df1 = Rserve::DataFrame.new(@hash) 
       df1.colnames.enums [:fac1, :var1, :res1]
       df1.colnames = %w(word to yo)
@@ -132,7 +132,7 @@ if RUBY_VERSION > '1.9'
       @r.converse(df: df1) { "names(df)" }.enums %w(word to yo)
     end
 
-    xit 'converts an array of parallel structs into a dataframe' do
+    it 'converts an array of parallel structs into a dataframe' do
       df = Rserve::DataFrame.from_structs( @ar_of_structs )
       df.is @hash.to_dataframe
     end
@@ -142,11 +142,11 @@ if RUBY_VERSION > '1.9'
       df.is @hash2.to_dataframe
     end
 
-    xit 'accepts simple dataframes when conversing with R' do
+    it 'accepts simple dataframes when conversing with R' do
       @r.converse(:df => @hash.to_dataframe) { "names(df)" }.is %w(fac1 var1 res1)
     end
 
-    xit 'accepts dataframes with rownames when conversing with R' do
+    it 'accepts dataframes with rownames when conversing with R' do
       rownames = [11,12,13,14]
       @r.converse(:df => @hash.to_dataframe(rownames)) { "row.names(df)" }.is rownames.map(&:to_s)
       rownames = %w(row1 row2 row3 row4)

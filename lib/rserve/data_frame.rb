@@ -24,7 +24,7 @@ module Rserve
       end
       data = {}
       names.zip(lengthwise_arrays) do |name, lengthwise_array|
-        data[name] = lengthwise_array.compact
+        data[name] = lengthwise_array
       end
       self.new(data)
     end
