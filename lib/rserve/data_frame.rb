@@ -1,4 +1,3 @@
-
 module Rserve
   # An R-centric container for storing data frame-ish data
   class DataFrame
@@ -15,8 +14,7 @@ module Rserve
     # takes an array of structs and returns a data frame object
     def self.from_structs(array)
       names = array.first.members
-			size = array.length
-      lengthwise_arrays = names.map { Array.new(size) } # This is where the nil value is created!!
+      lengthwise_arrays = names.map { Array.new(array.length) }
       array.each_with_index do |struct,m|
         struct.values.each_with_index do |val,n|
           lengthwise_arrays[n][m] = val
