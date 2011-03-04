@@ -15,7 +15,8 @@ module Rserve
     # takes an array of structs and returns a data frame object
     def self.from_structs(array)
       names = array.first.members
-      lengthwise_arrays = names.map { Array.new(names.size) }
+			size = array.length
+      lengthwise_arrays = names.map { Array.new(size) } # This is where the nil value is created!!
       array.each_with_index do |struct,m|
         struct.values.each_with_index do |val,n|
           lengthwise_arrays[n][m] = val
@@ -23,7 +24,7 @@ module Rserve
       end
       data = {}
       names.zip(lengthwise_arrays) do |name, lengthwise_array|
-        data[name] = lengthwise_array
+        data[name] = lengthwise_array.compact
       end
       self.new(data)
     end
