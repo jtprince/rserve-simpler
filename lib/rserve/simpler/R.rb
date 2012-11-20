@@ -1,3 +1,3 @@
 
-require 'rserve/simpler'
-R = Rserve::Simpler.new
+require 'rserve/simple'
+R = Rserve::Simple.new
